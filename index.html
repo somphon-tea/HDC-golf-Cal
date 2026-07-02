@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Score Leaderboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --primary-pastel: #E8D7FF;
+            --secondary-pastel: #D4E6B5;
+            --accent-pastel: #FFDFD3;
+            --text-main: #4A4A4A;
+            --text-muted: #8E8E93;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 16px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 480px; }
+        header { text-align: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, var(--primary-pastel), var(--secondary-pastel)); border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        header h1 { font-size: 22px; color: #4A3E56; margin-bottom: 4px; }
+        header p { font-size: 13px; color: #61556E; }
+        /* Nav tabs */
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; }
+        .nav-tab { flex: 1; min-width: 72px; padding: 10px 8px; background: var(--card-bg); border: none; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .nav-tab.active { background: var(--primary-pastel); color: #4A3E56; }
+        /* Tab content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .section-title { font-size: 17px; font-weight: 500; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #EAEAEA; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 10px; }
+        input:focus, select:focus { border-color: #C1A3E8; }
+        label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+        .btn-add { background-color: var(--secondary-pastel); color: #4A5D2E; border: none; padding: 8px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .btn-primary { background: linear-gradient(90deg, #C5A3FF, #A8D8B9); color: white; border: none; width: 100%; padding: 14px; border-radius: 15px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 6px; }
+        .btn-secondary { background: #F0EDF5; color: #6C5B7B; border: none; width: 100%; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+        .btn-delete { background: #FFE5E5; color: #E53E3E; border: none; width: 34px; height: 34px; border-radius: 10px; font-size: 16px; cursor: pointer; flex-shrink: 0; }
+        .card-name { font-weight: 500; }
+        .card-detail { font-size: 12px; color: var(--text-muted); }
+        .empty-state { text-align: center; color: var(--text-muted); font-size: 14px; padding: 24px 0; }
+        /* Leaderboard */
+        .chips { display: flex; gap: 8px; margin-bottom: 14px; }
+        .chip { flex: 1; padding: 8px; background: #FAFAFC; border: 1px solid #EAEAEA; border-radius: 20px; font-size: 13px; text-align: center; cursor: pointer; }
+        .chip.active { background: var(--primary-pastel); border-color: var(--primary-pastel); color: #4A3E56; font-weight: 500; }
+        .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #FAFAFC; border-radius: 15px; margin-bottom: 10px; }
+        .rank-item.top-1 { background: linear-gradient(90deg, #FFF4E5, #FFFDF0); border-left: 5px solid #FFB84D; }
+        .rank-item.top-2 { border-left: 5px solid #C0C0C0; }
+        .rank-item.top-3 { border-left: 5px solid #CD7F32; }
+        .rank-left { display: flex; align-items: center; gap: 12px; }
+        .rank-number { font-size: 15px; font-weight: 600; min-width: 28px; height: 28px; background: #EAEAEA; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .player-name { font-weight: 500; }
+        .score-details { font-size: 12px; color: var(--text-muted); }
+        .score-badge { background: #F0EDF5; padding: 6px 12px; border-radius: 20px; font-weight: 600; color: #6C5B7B; font-size: 14px; }
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: flex-end; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; width: 100%; max-width: 480px; border-radius: 20px 20px 0 0; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        .modal-title { font-size: 18px; font-weight: 500; margin-bottom: 16px; }
+        @media (min-width: 520px) { .modal { align-items: center; } .modal-content { border-radius: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Golf กับแก๊งเพื่อน ⛳</h1>
+            <p>คำนวณ Net Score และจัดอันดับแบบเรียลไทม์</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('leaderboard', this)">🏆 อันดับ</button>
+            <button class="nav-tab" onclick="switchTab('players', this)">👤 ผู้เล่น</button>
+            <button class="nav-tab" onclick="switchTab('courses', this)">📍 สนาม</button>
+            <button class="nav-tab" onclick="switchTab('groups', this)">👥 กลุ่ม</button>
+            <button class="nav-tab" onclick="switchTab('history', this)">📜 ประวัติ</button>
+        </div>
+
+        <!-- LEADERBOARD TAB -->
+        <div id="leaderboard" class="tab-content active">
+            <div class="section-card">
+                <div class="section-title">
+                    <span>📊 อันดับคะแนน</span>
+                    <button class="btn-add" onclick="openModal('eventModal')">+ บันทึกรอบ</button>
+                </div>
+                <div id="current-event-info" style="display:none; margin-bottom:14px; font-size:13px; color:var(--text-muted);">
+                    <div>📍 <span id="event-course"></span></div>
+                    <div>📅 <span id="event-date"></span></div>
+                </div>
+                <div class="chips">
+                    <div class="chip active" onclick="toggleScoreFilter('net', this)">Net</div>
+                    <div class="chip" onclick="toggleScoreFilter('gross', this)">Gross</div>
+                    <div class="chip" onclick="toggleScoreFilter('stableford', this)">Stableford</div>
+                </div>
+                <div id="leaderboard-list"></div>
+                <div id="leaderboard-empty" class="empty-state">ยังไม่มีรอบการเล่น — กด "บันทึกรอบ" เพื่อเริ่ม</div>
+                <div id="export-section" style="display:none;">
+                    <button class="btn-secondary" onclick="copyToClipboard()">💬 คัดลอกส่งเข้า LINE</button>
+                    <button class="btn-secondary" onclick="exportCSV()">⬇️ Export CSV</button>
+                    <button class="btn-secondary" onclick="exportJSON()">⬇️ Export JSON</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYERS TAB -->
+        <div id="players" class="tab-content">
+            <div class="section-card">
+                <div class="section-title">
+                    <span>👤 ผู้เล่น</span>
+                    <button class="btn-add" onclick="openModal('playerModal')">+ เพิ่ม</button>
+                </div>
+                <div id="players-list"></div>
+                <div id="players-empty" class="empty-state">ยังไม่มีผู้เล่น</div>
+            </div>
+        </div>
+
+        <!-- COURSES TAB -->
+        <div id="courses" class="tab-content">
+            <div class="section-card">
+                <div class="section-title">
+                    <span>📍 สนามกอล์ฟ</span>
+                    <button class="btn-add" onclick="openModal('courseModal')">+ เพิ่ม</button>
+                </div>
+                <div id="courses-list"></div>
+                <div id="courses-empty" class="empty-state">ยังไม่มีสนาม</div>
+            </div>
+        </div>
+
+        <!-- GROUPS TAB -->
+        <div id="groups" class="tab-content">
+            <div class="section-card">
+                <div class="section-title">
+                    <span>👥 กลุ่ม</span>
+                    <button class="btn-add" onclick="openModal('groupModal')">+ เพิ่ม</button>
+                </div>
+                <div id="groups-list"></div>
+                <div id="groups-empty" class="empty-state">ยังไม่มีกลุ่ม</div>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history" class="tab-content">
+            <div class="section-card">
+                <div class="section-title"><span>📜 ประวัติการเล่น</span></div>
+                <div id="history-list"></div>
+                <div id="history-empty" class="empty-state">ยังไม่มีประวัติ</div>
+            </div>
+            <div class="section-card">
+                <div class="section-title"><span>📈 สถิติผู้เล่น</span></div>
+                <div id="player-stats"></div>
+                <div id="stats-empty" class="empty-state">ยังไม่มีสถิติ</div>
+            </div>
+            <div class="section-card">
+                <div class="section-title"><span>⚙️ ข้อมูล</span></div>
+                <button class="btn-secondary" onclick="exportAllData()">⬇️ Backup ข้อมูลทั้งหมด</button>
+                <label style="margin-top:10px;">นำเข้าข้อมูล (JSON)</label>
+                <input type="file" accept="application/json" onchange="importData(event)">
+                <button class="btn-secondary" style="background:#FFE5E5;color:#E53E3E;" onclick="clearAllData()">🗑️ ล้างข้อมูลทั้งหมด</button>
+            </div>
+        </div>
+
+        <!-- PLAYER MODAL -->
+        <div id="playerModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-title">เพิ่มผู้เล่น</div>
+                <label>ชื่อ</label>
+                <input type="text" id="playerName" placeholder="ชื่อผู้เล่น">
+                <label>Handicap</label>
+                <input type="number" id="playerHandicap" placeholder="0">
+                <label>หมายเหตุ</label>
+                <input type="text" id="playerNotes" placeholder="(ไม่บังคับ)">
+                <button class="btn-primary" onclick="savePlayer()">บันทึก</button>
+                <button class="btn-secondary" onclick="closeModal('playerModal')">ยกเลิก</button>
+            </div>
+        </div>
+
+        <!-- COURSE MODAL -->
+        <div id="courseModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-title">เพิ่มสนาม</div>
+                <label>ชื่อสนาม</label>
+                <input type="text" id="courseName" placeholder="ชื่อสนามกอล์ฟ">
+                <label>Par</label>
+                <input type="number" id="coursePar" value="72">
+                <label>Rating</label>
+                <input type="number" id="courseRating" value="73.5" step="0.1">
+                <label>Slope</label>
+                <input type="number" id="courseSlope" value="135">
+                <label>ที่ตั้ง</label>
+                <input type="text" id="courseLocation" placeholder="จังหวัด / เมือง">
+                <button class="btn-primary" onclick="saveCourse()">บันทึก</button>
+                <button class="btn-secondary" onclick="closeModal('courseModal')">ยกเลิก</button>
+            </div>
+        </div>
+
+        <!-- GROUP MODAL -->
+        <div id="groupModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-title">สร้างกลุ่ม</div>
+                <label>ชื่อกลุ่ม</label>
+                <input type="text" id="groupName" placeholder="ชื่อกลุ่ม">
+                <label>เลือกผู้เล่น</label>
+                <div id="groupPlayers"></div>
+                <button class="btn-primary" onclick="saveGroup()">บันทึก</button>
+                <button class="btn-secondary" onclick="closeModal('groupModal')">ยกเลิก</button>
+            </div>
+        </div>
+
+        <!-- EVENT MODAL -->
+        <div id="eventModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-title">บันทึกรอบใหม่</div>
+                <label>สนาม</label>
+                <select id="eventCourse"></select>
+                <label>วันที่</label>
+                <input type="date" id="eventDate">
+                <label>ผู้เล่น</label>
+                <div id="eventPlayers"></div>
+                <label>กรอกคะแนน</label>
+                <div id="scoreInput"></div>
+                <label>รูป (ไม่บังคับ)</label>
+                <input type="file" id="eventPhoto" accept="image/*">
+                <button class="btn-primary" onclick="saveEvent()">บันทึกรอบ</button>
+                <button class="btn-secondary" onclick="closeModal('eventModal')">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
